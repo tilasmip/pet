@@ -67,3 +67,63 @@ class User(AbstractBaseUser):
         "Is the user a member of staff?"
         # Simplest possible answer: All admins are staff
         return self.is_admin
+    
+class Category(models.Model):
+    name = models.CharField(max_length = 50)
+    created_at = models.DateTimeField(auto_now_add= True)
+    updated_at = models.DateTimeField(auto_now =True)
+    
+
+class Breed(models.Model):
+    name = models.CharField(max_length= 50)
+    category = models.ForeignKey(Category,on_delete = models.RESTRICT)
+    created_at = models.DateTimeField(auto_now_add= True)
+    updated_at = models.DateTimeField(auto_now =True)
+
+class Animal(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.RESTRICT)
+    breed = models.ForeignKey(Breed, on_delete = models.RESTRICT)
+    image = models.CharField(max_length = 255)
+    views = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add= True)
+    updated_at = models.DateTimeField(auto_now =True)
+
+class Product(models.Model):
+    name = models.CharField(max_length = 150)
+    category = models.ForeignKey(Category, on_delete=models.RESTRICT)
+    price = models.DecimalField(decimal_places=2, max_digits=10)
+    stock = models.DecimalField(decimal_places=2, max_digits=10)
+    created_at = models.DateTimeField(auto_now_add= True)
+    updated_at = models.DateTimeField(auto_now =True)
+
+
+class ProductWhislist(models.Model):
+    user = models.ForeignKey(User,on_delete = models.RESTRICT)
+    product = models.ForeignKey(Product,on_delete=models.RESTRICT)
+    created_at = models.DateTimeField(auto_now_add= True)
+    updated_at = models.DateTimeField(auto_now =True)
+
+class AnimalWhislist(models.Model):
+    user = models.ForeignKey(User,on_delete = models.RESTRICT)
+    animal = models.ForeignKey(Product,on_delete=models.RESTRICT)
+    created_at = models.DateTimeField(auto_now_add= True)
+    updated_at = models.DateTimeField(auto_now =True)
+
+class ProductCart(models.Model):
+    user = models.ForeignKey(User,on_delete = models.RESTRICT)
+    product = models.ForeignKey(Product, on_delete= models.RESTRICT)
+    quantity = models.DecimalField(decimal_places=2, max_digits=10)
+    created_at = models.DateTimeField(auto_now_add= True)
+    updated_at = models.DateTimeField(auto_now =True)
+
+class ProductSales(models.Model):
+    user = models.ForeignKey(User,on_delete = models.RESTRICT)
+    product = models.ForeignKey(Product, on_delete= models.RESTRICT)
+    quantity = models.DecimalField(decimal_places=2, max_digits=10)
+    cupon_id = models.CharField(max_length= 20)
+    amount = models.DecimalField(decimal_places=2, max_digits=10)
+    referenceId = models.CharField(max_length = 50)
+    created_at = models.DateTimeField(auto_now_add= True)
+    updated_at = models.DateTimeField(auto_now =True)
+
+    

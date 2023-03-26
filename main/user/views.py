@@ -1,13 +1,13 @@
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from main.serializers import (UserRegistrationSerializer, 
-                              UserLoginSerializer, 
-                              UserProfileSerializer, 
-                              UserChangePasswordSerializer,
-                              RequestPasswordResetSerializer,
-                              UserPasswordResetSerializer,
-                              )
+from .serializer import (UserRegistrationSerializer, 
+                        UserLoginSerializer, 
+                        UserProfileSerializer, 
+                        UserChangePasswordSerializer,
+                        RequestPasswordResetSerializer,
+                        UserPasswordResetSerializer,
+                        )
 
 from main.renderers import UserRenderer
 from django.contrib.auth import authenticate
