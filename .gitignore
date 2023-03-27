@@ -3,7 +3,7 @@ db.sqlite3
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
-
+/documents/
 # C extensions
 *.so
 **/migrations/*.py

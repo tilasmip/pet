@@ -39,6 +39,7 @@ class User(AbstractBaseUser):
         unique=True,
     )
     name = models.CharField(max_length=50)
+    profile_image = models.ImageField(upload_to="documents/images/profiles",blank=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add= True)
@@ -69,27 +70,30 @@ class User(AbstractBaseUser):
         return self.is_admin
     
 class Category(models.Model):
-    name = models.CharField(max_length = 50)
+    name = models.CharField(max_length = 50, unique=True,error_messages="Category name is unique and required.")
     created_at = models.DateTimeField(auto_now_add= True)
     updated_at = models.DateTimeField(auto_now =True)
     
 
 class Breed(models.Model):
-    name = models.CharField(max_length= 50)
+    name = models.CharField(max_length= 50, unique= True,error_messages="Breed name is unique and required.")
     category = models.ForeignKey(Category,on_delete = models.RESTRICT)
     created_at = models.DateTimeField(auto_now_add= True)
     updated_at = models.DateTimeField(auto_now =True)
 
 class Animal(models.Model):
+    description = models.CharField(default = "Dog", max_length = 255)
     category = models.ForeignKey(Category, on_delete=models.RESTRICT)
     breed = models.ForeignKey(Breed, on_delete = models.RESTRICT)
-    image = models.CharField(max_length = 255)
-    views = models.IntegerField()
+    image = models.ImageField(upload_to="documents/images/animals",blank=True)
+    views = models.IntegerField(blank = True)
     created_at = models.DateTimeField(auto_now_add= True)
     updated_at = models.DateTimeField(auto_now =True)
 
 class Product(models.Model):
     name = models.CharField(max_length = 150)
+    description = models.CharField(max_length = 255, blank = True)
+    image = models.ImageField(upload_to="documents/images/products",blank=True)
     category = models.ForeignKey(Category, on_delete=models.RESTRICT)
     price = models.DecimalField(decimal_places=2, max_digits=10)
     stock = models.DecimalField(decimal_places=2, max_digits=10)
