@@ -9,4 +9,6 @@ urlpatterns = [
     path('category/',include('main.category.urls')),
     path('breed/',include('main.breed.urls')),
     path('animal/',include('main.animal.urls')),
+    path('animal_whislist/',include('main.animal_whislist.urls')),
+    path('product_whislist/',include('main.product_whislist.urls')),
 ]

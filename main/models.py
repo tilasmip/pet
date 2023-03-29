@@ -74,12 +74,17 @@ class Category(models.Model):
     created_at = models.DateTimeField(auto_now_add= True)
     updated_at = models.DateTimeField(auto_now =True)
     
+    def __str__(self):
+        return f'{self.name}'
 
 class Breed(models.Model):
     name = models.CharField(max_length= 50, unique= True,error_messages="Breed name is unique and required.")
     category = models.ForeignKey(Category,on_delete = models.RESTRICT)
     created_at = models.DateTimeField(auto_now_add= True)
     updated_at = models.DateTimeField(auto_now =True)
+
+    def __str__(self):
+        return f'{self.name}'
 
 class Animal(models.Model):
     description = models.CharField(default = "Dog", max_length = 255)
@@ -89,6 +94,9 @@ class Animal(models.Model):
     views = models.IntegerField(blank = True)
     created_at = models.DateTimeField(auto_now_add= True)
     updated_at = models.DateTimeField(auto_now =True)
+
+    def __str__(self):
+        return f'{self.breed.name}:{self.description[:35]}'
 
 class Product(models.Model):
     name = models.CharField(max_length = 150)
@@ -100,6 +108,8 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add= True)
     updated_at = models.DateTimeField(auto_now =True)
 
+    def __str__(self):
+        return f'{self.name} at Rs. {self.price}'
 
 class ProductWhislist(models.Model):
     user = models.ForeignKey(User,on_delete = models.RESTRICT)
@@ -107,11 +117,17 @@ class ProductWhislist(models.Model):
     created_at = models.DateTimeField(auto_now_add= True)
     updated_at = models.DateTimeField(auto_now =True)
 
+    def __str__(self):
+        return f'{self.product.name} for {self.user.name}'
+
 class AnimalWhislist(models.Model):
     user = models.ForeignKey(User,on_delete = models.RESTRICT)
-    animal = models.ForeignKey(Product,on_delete=models.RESTRICT)
+    animal = models.ForeignKey(Animal,on_delete=models.RESTRICT)
     created_at = models.DateTimeField(auto_now_add= True)
     updated_at = models.DateTimeField(auto_now =True)
+
+    def __str__(self):
+        return f'{self.animal.breed.name}'
 
 class ProductCart(models.Model):
     user = models.ForeignKey(User,on_delete = models.RESTRICT)
@@ -119,6 +135,9 @@ class ProductCart(models.Model):
     quantity = models.DecimalField(decimal_places=2, max_digits=10)
     created_at = models.DateTimeField(auto_now_add= True)
     updated_at = models.DateTimeField(auto_now =True)
+
+    def __str__(self):
+        return f'{self.product.name} x {self.quantity}'
 
 class ProductSales(models.Model):
     user = models.ForeignKey(User,on_delete = models.RESTRICT)
@@ -129,5 +148,8 @@ class ProductSales(models.Model):
     referenceId = models.CharField(max_length = 50)
     created_at = models.DateTimeField(auto_now_add= True)
     updated_at = models.DateTimeField(auto_now =True)
+
+    def __str__(self):
+        return f'{self.product.name} at Rs.{self.amount}'
 
     
