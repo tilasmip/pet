@@ -152,4 +152,4 @@ class ProductSales(models.Model):
     def __str__(self):
         return f'{self.product.name} at Rs.{self.amount}'
 
-    
+

@@ -11,4 +11,5 @@ urlpatterns = [
     path('animal/',include('main.animal.urls')),
     path('animal_whislist/',include('main.animal_whislist.urls')),
     path('product_whislist/',include('main.product_whislist.urls')),
+    path('product_cart/',include('main.product_cart.urls')),
 ]
