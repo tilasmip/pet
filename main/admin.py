@@ -1,5 +1,5 @@
 from django.contrib import admin
-from main.models import User, Product
+from main.models import User, Product, Category, Breed, Animal
 from django.contrib.auth.admin import UserAdmin as BaseUserModelAdmin
 
 class UserModelAdmin(BaseUserModelAdmin):
@@ -62,4 +62,7 @@ class ProductModelAdmin(admin.ModelAdmin):
     filter_horizontal = ()
 
 admin.site.register(Product, ProductModelAdmin)
+admin.site.register(Category,admin.ModelAdmin)
+admin.site.register(Breed,admin.ModelAdmin)
+admin.site.register(Animal,admin.ModelAdmin)
 
