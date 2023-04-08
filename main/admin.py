@@ -3,6 +3,7 @@ from main.models import (User, Product, Animal, ProductWhislist,
                          ProductSales, AnimalWhislist, Adoption, ProductCart,
                          Breed, Category, CartSummary
                          )
+
 from django.contrib.auth.admin import UserAdmin as BaseUserModelAdmin
 
 
