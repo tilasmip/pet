@@ -62,7 +62,7 @@ class UserProfileView(APIView):
 
     def get(self, request, format=None):
         serializer = UserProfileSerializer(request.user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({'data':serializer.data}, status=status.HTTP_200_OK)
 
 
 class UserChangePasswordView(APIView):

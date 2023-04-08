@@ -102,13 +102,3 @@ class DeleteAnimalSerializer(serializers.Serializer):
     def delete_animal(self):
         name = self.context.get('id')
         self.animal.delete()
-
-
-class GetAnimalSerializer(serializers.Serializer):
-
-    def get_queryset(self):
-        pageNo = self.data.get('pageNo')
-        if pageNo is None or pageNo <= 0:
-            pageNo = 1
-
-        return Animal.objects.all()[(pageNo-1)*10:pageNo*10]

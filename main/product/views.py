@@ -37,11 +37,15 @@ class RecentProductView(APIView):
     serializer_class = RecentProductSerializer
 
     def to_object(self, data):
+        if(data.image.name is not None):
+            name = data.image.name.split("/")[-1]
+        else:
+            name = ""
         return {
             'description': data.description,
             'name': data.name,
             'price': data.price,
-            'image': data.image.path,
+            'image': name,
             'category': data.category.name,
             'category_id': data.category.id,
             'id': data.id,
@@ -63,11 +67,15 @@ class GetProductView(generics.ListAPIView):
     parser_classes = []
 
     def to_object(self, data):
+        if(data.image.name is not None):
+            name = data.image.name.split("/")[-1]
+        else:
+            name = ""
         return {
             'description': data.description,
             'name': data.name,
             'price': data.price,
-            'image': data.image.path,
+            'image': name,
             'category': data.category.name,
             'category_id': data.category.id,
             'id': data.id,
