@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import (BaseUserManager,
                                         AbstractBaseUser)
-from .enums import AdoptionStatus
+from .enums import AdoptionStatus, Gender
 
 
 class UserManager(BaseUserManager):
@@ -97,11 +97,17 @@ class Breed(models.Model):
 
 
 class Animal(models.Model):
+    name = models.CharField(max_length=100, default="Ramro Dog")
     posted_by = models.ForeignKey(
         User, on_delete=models.RESTRICT, related_name="posted_by")
     description = models.CharField(default="Dog", max_length=255)
+    personality = models.CharField(max_length=100, default="Jumps a lot.")
+    likes = models.CharField(max_length=100, default="Tear down the chairs.")
     category = models.ForeignKey(Category, on_delete=models.RESTRICT)
     breed = models.ForeignKey(Breed, on_delete=models.RESTRICT)
+    age = models.DecimalField(default=1, decimal_places=3, max_digits=10)
+    gender = models.CharField(
+        max_length=10, choices=Gender.choices(), default=Gender.MALE)
     image = models.ImageField(upload_to="documents/images/animals", blank=True)
     adopted = models.BooleanField(default=False)
     popularity = models.IntegerField(blank=True, default=0)
@@ -167,10 +173,20 @@ class AnimalWhislist(models.Model):
         return f'{self.animal.breed.name}'
 
 
+class CartSummary(models.Model):
+    user = models.ForeignKey(User, blank=True, on_delete=models.CASCADE)
+    shipping_address = models.CharField(max_length=255)
+    additional_info = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
 class ProductCart(models.Model):
     user = models.ForeignKey(User, on_delete=models.RESTRICT)
     product = models.ForeignKey(Product, on_delete=models.RESTRICT)
     quantity = models.DecimalField(decimal_places=2, max_digits=10)
+    cart_summary = models.ForeignKey(
+        CartSummary, blank=True, null=True, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

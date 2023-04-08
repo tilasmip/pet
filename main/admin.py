@@ -1,7 +1,7 @@
 from django.contrib import admin
 from main.models import (User, Product, Animal, ProductWhislist,
                          ProductSales, AnimalWhislist, Adoption, ProductCart,
-                         Breed, Category
+                         Breed, Category, CartSummary
                          )
 from django.contrib.auth.admin import UserAdmin as BaseUserModelAdmin
 
@@ -76,3 +76,4 @@ admin.site.register(ProductCart, admin.ModelAdmin)
 admin.site.register(ProductSales, admin.ModelAdmin)
 admin.site.register(Breed, admin.ModelAdmin)
 admin.site.register(Category, admin.ModelAdmin)
+admin.site.register(CartSummary, admin.ModelAdmin)

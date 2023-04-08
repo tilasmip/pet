@@ -23,10 +23,15 @@ class SaveAnimalView(APIView):
     def post(self, request, format=None):
         data = {
             "popularity": request.data.get("popularity", 0),
-            "category": request.data.get("category_id"),
-            "breed": request.data.get("breed_id"),
+            "name": request.data.get("name"),
+            "age": request.data.get("age"),
+            "gender": request.data.get("gender"),
+            "likes": request.data.get("likes"),
+            "personality": request.data.get("personality"),
+            "category": request.data.get("category"),
+            "breed": request.data.get("breed"),
             "image": request.FILES.get("image"),
-            "posted_by": request.data.get("posted_by_id")
+            "posted_by": request.user.id
 
         }
         serializer = SaveAnimalSerializer(data=data)
@@ -48,6 +53,34 @@ class UpdatePopularityView(APIView):
         return Response({'msg': 'Animal updated successfully.'})
 
 
+class GetRecentAnimalView(generics.ListAPIView):
+    parser_classes = []
+
+    def to_object(self, data):
+        return {
+            'description': data.description,
+            'breed': data.breed.name,
+            "popularity": data.popularity,
+            "personality": data.personality,
+            "likes": data.likes,
+            "name": data.name,
+            "age": data.age,
+            "gender": data.gender,
+            'breed': data.breed.name,
+            'image': data.image.path,
+            'category': data.category.name,
+            'id': data.id
+        }
+    queryset = Animal.objects.all()
+
+    def get(self, request, format=None):
+        renderer_classes = [UserRenderer]
+        animals = self.queryset.order_by("-created_at")[:5]
+        data = map(self.to_object, animals)
+
+        return Response({'data': data}, status=status.HTTP_200_OK)
+
+
 class GetAnimalView(generics.ListAPIView):
     parser_classes = []
 
@@ -55,10 +88,16 @@ class GetAnimalView(generics.ListAPIView):
         return {
             'description': data.description,
             'breed': data.breed.name,
-            'breed_id': data.breed.id,
+            "popularity": data.popularity,
+            "personality": data.personality,
+            "likes": data.likes,
+            "name": data.name,
+            "age": data.age,
+            "gender": data.gender,
+            'breed': data.breed.id,
             'image': data.image.path,
             'category': data.category.name,
-            'category_id': data.category.id,
+            'category': data.category.id,
             'id': data.id
         }
 

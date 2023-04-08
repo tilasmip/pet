@@ -10,3 +10,13 @@ class AdoptionStatus(Enum):
     @classmethod
     def choices(cls):
         return tuple((i.name, i.value) for i in cls)
+
+
+class Gender(Enum):
+    MALE = "MALE"
+    FEMALE = "FEMALE"
+    OTHER = "OTHER"
+
+    @classmethod
+    def choices(cls):
+        return tuple((i.name, i.value) for i in cls)

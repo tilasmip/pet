@@ -11,7 +11,8 @@ class SaveAnimalSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Animal
-        fields = ['category', 'breed', 'image', 'popularity', 'posted_by']
+        fields = ['category', 'breed', 'image', 'popularity', 'name',
+                  'personality', 'likes', 'description', 'posted_by']
 
     def validate(self, attrs):
         # category_id = attrs.get('category')
