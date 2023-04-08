@@ -13,11 +13,16 @@
 <li>Now nevigate to the folter where manage.py file locates</li>
 <li>Install the requirements
     <code>python -m pip install -r requirements.txt</code></li>
-<li>Build the tables
+<li>Build the tables<br/>
     <code>python manage.py makemigrations</code>
     <code>python manage.py migrate</code></li>
+ <li>Before using any admin feature make sure to create a superadmin account. To create a sueruser account type <br/>
+     <code> python manage.py createsuperuser</code>
+     <br>
+     Fill the details and admin feature is ready to go
 <li>Run the project on localhost
     <code>python manage.py runserver 8000</code></li>
+    <a> http:localhost:8000/admin to access admin feature</a>
 <li>The apis can be accessed by adding the jsonfile from the link to your postman
     https://api.postman.com/collections/9550962-b7fb5af8-5311-4511-bd01-6b31d78bf65a?access_key=PMAT-01GWC71RW832VNXVFNTZC6MAMC</li>
 </ul>
