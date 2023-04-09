@@ -13,6 +13,14 @@
 <li>Now nevigate to the folter where manage.py file locates</li>
 <li>Install the requirements
     <code>python -m pip install -r requirements.txt</code></li>
+<li> Now the requirements have been installed, we are going to make the required directories for the file uploads. We are going to make total of 5 folders with only 3 commands. Type the following commands to make folders.
+<br/>
+mkdir documents/images/profiles
+<br/>
+mkdir documents/images/products
+<br/>
+mkdir documents/images/animals
+</li>
 <li>Build the tables<br/>
     <code>python manage.py makemigrations</code>
     <code>python manage.py migrate</code></li>
