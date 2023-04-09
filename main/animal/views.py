@@ -8,6 +8,7 @@ from .serializer import (SaveAnimalSerializer,
                          UpdateAnimalSerializer,
                          DeleteAnimalSerializer)
 from django.core import serializers
+from main.enums import Gender
 
 from main.models import Animal, AnimalWhislist
 from django.contrib.auth import authenticate
@@ -131,6 +132,7 @@ class GetAnimalView(generics.ListAPIView):
             name = data.image.name.split("/")[-1]
         else:
             name = ""
+        animals = Animal.objects.filter(posted_by=self.request.user)
         return {
             'description': data.description,
             'breed': data.breed.name,
@@ -145,6 +147,7 @@ class GetAnimalView(generics.ListAPIView):
             'postedBy': data.posted_by.email,
             'addedDate': data.created_at,
             'id': data.id,
+            'deletable': True if data in animals else False,
             'love': self.animal_whislist is not None and data.id in self.animal_whislist,
         }
 
@@ -169,22 +172,21 @@ class GetAnimalView(generics.ListAPIView):
             if age > 0 and age <= 6:
                 match age:
                     case 1:
-                        animals = animals.filter(age < 3)
+                        animals = animals.filter(age__lte=3)
                     case 2:
-                        animals = animals.filter(3 < age < 6)
+                        animals = animals.filter(age__lte=6)
                     case 3:
-                        animals = animals.filter(6 < age < 9)
+                        animals = animals.filter(age__lte=9)
                     case 4:
-                        animals = animals.filter(9 < age < 12)
+                        animals = animals.filter(age__lte=12)
                     case 5:
-                        animals = animals.filter(12 < age < 15)
+                        animals = animals.filter(age__lte=15)
                     case 6:
-                        animals = animals.filter(age >= 15)
+                        animals = animals.filter(age__gte=15)
 
         gender = self.purify(request.GET.get('gender'))
-        if gender is not None:
-            gender = gender.strip()
-        if gender is not None:
+        if gender is not None and gender != "0":
+            gender = getattr(Gender, gender.strip())
             animals = animals.filter(gender=gender)
             print(len(animals), gender)
         search = self.purify(request.GET.get('search'))
@@ -202,8 +204,8 @@ class GetAnimalView(generics.ListAPIView):
 
         if pageNo is None or pageNo <= 0:
             pageNo = 1
-
-        return animals[(pageNo-1)*10:pageNo*10]
+        animals = animals[(pageNo-1)*10:pageNo*10]
+        return animals
 
     def get(self, request, format=None):
         renderer_classes = [UserRenderer]
@@ -233,11 +235,14 @@ class UpdateAnimalView(APIView):
 
 class DeleteAnimalView(APIView):
     renderer_classes = [UserRenderer]
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [IsAuthenticated]
 
     def delete(self, request, pk, format=None):
         serializer = DeleteAnimalSerializer(
-            data=request.data, context={'id': pk})
+            data=request.data, context={'id': pk, 'user': request.user})
         serializer.is_valid(raise_exception=True)
-        serializer.delete_animal()
+        try:
+            serializer.delete_animal()
+        except Exception.RestrictedError as E:
+            return Response({'msg': 'Unable to delete please contact admin.'}, status=status.HTTP_424_FAILED_DEPENDENCY)
         return Response({'msg': 'Animal deleted successfully.'})

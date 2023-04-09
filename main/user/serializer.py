@@ -11,7 +11,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['email', 'name', 'password', 'password2']
+        fields = ['email', 'name', 'gender', 'address',
+                  'mobile', 'profile_image', 'password', 'password2']
         extra_kwargs = {
             'password': {'write_only': True}
         }
@@ -19,7 +20,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         password = attrs.get('password')
         password2 = attrs.get('password2')
-        if password != password:
+        if password != password2:
             raise serializers.ValidationError(
                 "Confirmation password got wrong.")
         return attrs
@@ -41,7 +42,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'name']
+        fields = ['id', 'email', 'name', 'address',
+                  'mobile', 'gender', 'profile_image']
 
 
 class UserChangePasswordSerializer(serializers.Serializer):
@@ -124,3 +126,11 @@ class UserPasswordResetSerializer(serializers.Serializer):
             return attrs
         except DjangoUnicodeDecodeError as tokenerror:
             raise serializers.ValidationError({'msg': 'Invalid token.'})
+
+
+class ProfileUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ['id', 'name', 'mobile', 'profile_image', 'address', 'gender']
+
+    def validate(self, attrs):
+        return attrs

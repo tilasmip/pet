@@ -51,7 +51,8 @@ class GetAnimalWhislistView(generics.ListAPIView):
         }
 
     def get(self, request, format=None):
-        serializer = GetAnimalWhislistSerializer(data=request.data)
+        serializer = GetAnimalWhislistSerializer(
+            data=request.data, context={'user': request.user})
         serializer.is_valid(raise_exception=True)
         result = serializer.get_queryset()
         data = []

@@ -27,7 +27,11 @@ def get_tokens_for_user(user):
 
 
 class UserRegistrationView(APIView):
+    renderer_classes = [UserRenderer]
+    permission_classes = []
+
     def post(self, request, format=False):
+        print("Inside")
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             user = serializer.save()
@@ -62,7 +66,32 @@ class UserProfileView(APIView):
 
     def get(self, request, format=None):
         serializer = UserProfileSerializer(request.user)
-        return Response({'data':serializer.data}, status=status.HTTP_200_OK)
+        return Response({'data': serializer.data}, status=status.HTTP_200_OK)
+
+
+class ProfileUpdateView(APIView):
+    renderer_classes = [UserRenderer]
+    permission_classes = [IsAuthenticated]
+
+    def purify(self, data):
+        if data is not None:
+            data = data.strip()
+        return data
+
+    def put(self, request, format=None):
+        serializer = UserProfileSerializer(data={
+            'profile_image': request.data.get('image'),
+            'mobile': self.purify(request.data.get('mobile')),
+            'name': self.purify(request.data.get('name')),
+            'gender': self.purify(request.data.get('gender')) or None,
+            'address': self.purify(request.data.get('address')) or None,
+            'email': request.user.email,
+            'id': request.user.id
+        })
+        serializer.is_valid(raise_exception=True)
+        print("Valid susccess")
+        serializer.update(request.user, serializer.validated_data)
+        return Response({'msg': 'update success'}, status=status.HTTP_200_OK)
 
 
 class UserChangePasswordView(APIView):
@@ -118,4 +147,4 @@ class UserIsAuthenticatedView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        return Response({'email': request.user.email,'mobile':request.user.mobile}, status=status.HTTP_200_OK)
+        return Response({'email': request.user.email, 'mobile': request.user.mobile}, status=status.HTTP_200_OK)

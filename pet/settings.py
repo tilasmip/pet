@@ -128,7 +128,8 @@ USE_TZ = True
 STATIC_URL = 'documents/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'documents/images/animals'),
-    os.path.join(BASE_DIR, 'documents/images/products')
+    os.path.join(BASE_DIR, 'documents/images/products'),
+    os.path.join(BASE_DIR, 'documents/images/profiles')
 ]
 
 # Default primary key field type

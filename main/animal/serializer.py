@@ -90,7 +90,8 @@ class DeleteAnimalSerializer(serializers.Serializer):
     def validate(self, attrs):
         id = self.context.get('id')
         try:
-            self.animal = Animal.objects.get(id=id)
+            self.animal = Animal.objects.get(
+                Q(id=id) & Q(posted_by=self.context.get('user')))
             if self.animal is None:
                 raise serializers.ValidationError(
                     {'msg': 'Animal doesn\'t exist.'})

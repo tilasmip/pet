@@ -5,7 +5,7 @@ from .enums import AdoptionStatus, Gender
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, email, name, mobile=None, password=None, password2=None):
+    def create_user(self, email, name, mobile=None, password=None, password2=None, gender=None, profile_image=None, address=None):
         """
         Creates and saves a User with the given email, name and password.
         """
@@ -15,6 +15,9 @@ class UserManager(BaseUserManager):
         user = self.model(
             email=self.normalize_email(email), mobile=mobile,
             name=name,
+            gender=gender,
+            profile_image=profile_image,
+            address=address
         )
 
         user.set_password(password)
@@ -42,6 +45,10 @@ class User(AbstractBaseUser):
         max_length=255,
         unique=True,
     )
+    gender = models.CharField(max_length=10, null=True,
+                              blank=True, choices=Gender.choices())
+    address = models.CharField(max_length=10, null=True,
+                               blank=True, default="Nepal")
     mobile = models.CharField(max_length=15)
     name = models.CharField(max_length=50)
     profile_image = models.ImageField(
@@ -166,7 +173,7 @@ class ProductWhislist(models.Model):
 
 class AnimalWhislist(models.Model):
     user = models.ForeignKey(User, on_delete=models.RESTRICT)
-    animal = models.ForeignKey(Animal, on_delete=models.RESTRICT)
+    animal = models.ForeignKey(Animal, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

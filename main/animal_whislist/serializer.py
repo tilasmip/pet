@@ -49,4 +49,4 @@ class DeleteAnimalWhislistSerializer(serializers.Serializer):
 class GetAnimalWhislistSerializer(serializers.Serializer):
 
     def get_queryset(self):
-        return AnimalWhislist.objects.all()
+        return AnimalWhislist.objects.filter(user=self.context.get('user'))
