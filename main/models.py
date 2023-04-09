@@ -5,7 +5,7 @@ from .enums import AdoptionStatus, Gender
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, email, name, mobile, password=None, password2=None):
+    def create_user(self, email, name, mobile=None, password=None, password2=None):
         """
         Creates and saves a User with the given email, name and password.
         """
@@ -21,13 +21,14 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, name, password=None):
+    def create_superuser(self, email, name, mobile=None, password=None):
         """
         Creates and saves a superuser with the given email, name and password.
         """
         user = self.create_user(
             email,
             password=password,
+            mobile=mobile,
             name=name,
         )
         user.is_admin = True
@@ -41,7 +42,7 @@ class User(AbstractBaseUser):
         max_length=255,
         unique=True,
     )
-    mobile = models.CharField(max_length=15, blank=True)
+    mobile = models.CharField(max_length=15)
     name = models.CharField(max_length=50)
     profile_image = models.ImageField(
         upload_to="documents/images/profiles", blank=True)
@@ -53,7 +54,7 @@ class User(AbstractBaseUser):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name']
+    REQUIRED_FIELDS = ['name', 'mobile']
 
     def __str__(self):
         return self.email
