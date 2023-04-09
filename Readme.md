@@ -30,7 +30,11 @@ mkdir documents/images/animals
      Fill the details and admin feature is ready to go
 <li>Run the project on localhost
     <code>python manage.py runserver 8000</code></li>
-    <a> http:localhost:8000/admin to access admin feature</a>
+    Visit: <a href="http:localhost:8000/admin">this like</a> to access admin feature.
+    <br/>
+    <i>Note:
+        Before proceeding any client features make sure you create the basic required data for Catebgory, Breeds and products. Inital data for animals is optional but best to fill up some data. 
+    </i>
 <li>The apis can be accessed by adding the jsonfile from the link to your postman
     https://api.postman.com/collections/9550962-b7fb5af8-5311-4511-bd01-6b31d78bf65a?access_key=PMAT-01GWC71RW832VNXVFNTZC6MAMC</li>
 </ul>
