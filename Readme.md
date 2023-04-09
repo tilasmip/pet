@@ -10,7 +10,7 @@
     <code>git clone https://github.com/tilasmip/pet.git</code>
     (or if you have the project write access) 
     <code>git pull origin main </code></li>
-<li>Now nevigate to the folter where manage.py file locates</li>
+<li>Now navigate to the folder where manage.py file locates</li>
 <li>Install the requirements
     <code>python -m pip install -r requirements.txt</code></li>
 <li> Now the requirements have been installed, we are going to make the required directories for the file uploads. We are going to make total of 5 folders with only 3 commands. Type the following commands to make folders.
@@ -24,7 +24,7 @@ mkdir documents/images/animals
 <li>Build the tables<br/>
     <code>python manage.py makemigrations</code>
     <code>python manage.py migrate</code></li>
- <li>Before using any admin feature make sure to create a superadmin account. To create a sueruser account type <br/>
+ <li>Before using any admin feature make sure to create a superadmin account. To create a superuser account type <br/>
      <code> python manage.py createsuperuser</code>
      <br>
      Fill the details and admin feature is ready to go
