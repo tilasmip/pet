@@ -1,4 +1,4 @@
-<h2>Note: If you have already cloned the project, do <br/><code>git pull origin main </code></h2> from the project folder.
+<h2>Note: If you have already cloned the project, do <br/><code>git pull origin main </code></h2> from the project folder. There is no need to clone the project again.
 <h4>Steps :</h4>
 <ul>
 <li>Create a folder anywhere in your desktop</li>
