@@ -26,7 +26,7 @@ class SaveProductCartSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         product_carts = ProductCart.objects.filter(
-            product=validated_data.get('product'))
+            product=validated_data.get('product'), user=validated_data.get('user'))
         if product_carts.exists():
             return product_carts[0]
         else:

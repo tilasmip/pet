@@ -32,6 +32,7 @@ class SaveProductCartView(APIView):
         serializer.save()
         return Response({'msg': 'Success.'}, status=status.HTTP_201_CREATED)
 
+
 class SaveCartSummary:
     renderer_classes = [UserRenderer]
     permission_classes = [IsAuthenticated]
@@ -48,15 +49,20 @@ class SaveCartSummary:
         serializer.save()
         return Response({'msg': 'Success.'}, status=status.HTTP_201_CREATED)
 
+
 class GetProductCartView(generics.ListAPIView):
     parser_classes = []
 
     def to_object(self, data):
+        if (data.product.image is not None):
+            name = data.product.image.name.split("/")[-1]
+        else:
+            name = ""
         print(data.product.image)
         return {
             'user_id': data.user.id,
             'user': data.user.name,
-            'image': data.product.image.url,
+            'image': name,
             'category': data.product.category.name,
             'product': data.product.name,
             'price': data.product.price,
@@ -88,8 +94,6 @@ class UpdateProductCartView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({'msg': 'ProductCart updated successfully.'})
-
-
 
 
 class DeleteProductCartView(APIView):
