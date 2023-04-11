@@ -1,9 +1,7 @@
 from django.urls import path
-from main.product_cart.views import *
+from main.product_sales.views import *
 
 urlpatterns = [
-    path('save',SaveProductCartView().as_view(),name='save ProductCart'),
-    path('get',GetProductCartView().as_view(),name='get ProductCart'),
-    path('update/<pk>',UpdateProductCartView().as_view(),name='update ProductCart'),
-    path('delete/<pk>',DeleteProductCartView().as_view(),name='update ProductCart'),
+    path('save', SaveProductSalesView().as_view(), name='save ProductSales'),
+    path('invoice/<refId>', GetProductSalesView().as_view(), name='get ProductSales')
 ]

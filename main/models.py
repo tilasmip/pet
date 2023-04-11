@@ -185,6 +185,9 @@ class CartSummary(models.Model):
     user = models.ForeignKey(User, blank=True, on_delete=models.CASCADE)
     shipping_address = models.CharField(max_length=255)
     additional_info = models.CharField(max_length=255)
+    processing = models.BooleanField(default=True)
+    amount = models.DecimalField(
+        decimal_places=2, max_digits=10, default=100, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -193,6 +196,7 @@ class ProductCart(models.Model):
     user = models.ForeignKey(User, on_delete=models.RESTRICT)
     product = models.ForeignKey(Product, on_delete=models.RESTRICT)
     quantity = models.DecimalField(decimal_places=2, max_digits=10)
+
     cart_summary = models.ForeignKey(
         CartSummary, blank=True, null=True, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)

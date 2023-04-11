@@ -37,19 +37,21 @@ class SaveProductCartSerializer(serializers.ModelSerializer):
 class SaveCartSummarySerializer(serializers.ModelSerializer):
     class Meta:
         model = CartSummary
-        fields = ['user', 'amount', 'shipping_address', 'additional_info']
+        fields = ['user', 'amount', 'shipping_address',
+                  'additional_info', 'processing']
 
     def validate(self, attrs):
         return attrs
 
     def create(self, validated_data):
-        product_carts = ProductCart.objects.filter(
-            product=validated_data.get('product'))
-        if product_carts.exists():
-            return product_carts[0]
-        else:
-            product_cart = ProductCart.objects.create(**validated_data)
-            return product_cart
+        carts = ProductCart.objects.filter(user=validated_data.get('user'))
+        if carts.exists():
+            summary = CartSummary.objects.create(**validated_data)
+            for cart in carts:
+                cart.cart_summary = summary
+                cart.save()
+            return summary
+        raise serializers.ValidationError("No Item found.")
 
 
 class UpdateProductCartSerializer(serializers.ModelSerializer):

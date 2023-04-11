@@ -1,16 +1,16 @@
 from rest_framework import serializers
 from django.db.models import Q
 from main.models import ProductSales, Product
-from django.utils.encoding import smart_str, force_bytes,DjangoUnicodeDecodeError
+from django.utils.encoding import smart_str, force_bytes, DjangoUnicodeDecodeError
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
 
 class SaveProductSalesSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductSales
-        fields = ['user','product','quantity','amount','cupon_id','referenceId']
+        fields = ['user', 'product', 'quantity', 'amount', 'referenceId']
 
-    def validate(self,attrs):
+    def validate(self, attrs):
         # category_id = attrs.get('category')
         # breed_id = attrs.get('breed')
         # print(category_id.id,breed_id.id,"categ")
@@ -22,9 +22,8 @@ class SaveProductSalesSerializer(serializers.ModelSerializer):
         # if self.category is None:
         #     raise serializers.ValidationError({'msg':{'Category does not exits'}})
         return attrs
-    
-    def create(self,validated_data):
-        
+
+    def create(self, validated_data):
         product_sales = ProductSales.objects.create(**validated_data)
         return product_sales
 
@@ -36,9 +35,9 @@ class SaveProductSalesSerializer(serializers.ModelSerializer):
 #         fields = ['user','product','quantity']
 
 #     def validate(self,attrs):
-        
+
 #         return attrs
-    
+
 #     def update(self, instance, validated_data):
 #         instance.product = validated_data.get('product')
 #         print("qty",validated_data.get('quantity'))
@@ -58,17 +57,7 @@ class SaveProductSalesSerializer(serializers.ModelSerializer):
 #         except:
 #             raise serializers.ValidationError({'msg':'ProductSales doesn\'t exist.'})
 #         return attrs
-    
+
 #     def delete_product_sales(self):
 #         name = self.context.get('id')
 #         self.product_sales.delete()
-
-        
-class GetProductSalesSerializer(serializers.Serializer):
-    
-    def get_queryset(self):
-        pageNo = self.data.get('pageNo')
-        if pageNo is None or pageNo <=0:
-            pageNo = 1
-
-        return ProductSales.objects.all()[(pageNo-1)*10:pageNo*10]

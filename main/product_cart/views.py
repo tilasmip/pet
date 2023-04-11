@@ -33,7 +33,7 @@ class SaveProductCartView(APIView):
         return Response({'msg': 'Success.'}, status=status.HTTP_201_CREATED)
 
 
-class SaveCartSummary:
+class SaveCartSummary(APIView):
     renderer_classes = [UserRenderer]
     permission_classes = [IsAuthenticated]
 
@@ -46,8 +46,8 @@ class SaveCartSummary:
         }
         serializer = SaveCartSummarySerializer(data=data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response({'msg': 'Success.'}, status=status.HTTP_201_CREATED)
+        instance = serializer.save()
+        return Response({'msg': instance.id}, status=status.HTTP_201_CREATED)
 
 
 class GetProductCartView(generics.ListAPIView):
