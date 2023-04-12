@@ -1,6 +1,6 @@
 from django.contrib import admin
 from main.models import (User, Product, Animal, ProductWhislist,
-                         ProductSales, AnimalWhislist, Adoption, ProductCart,
+                         AnimalWhislist, Adoption, ProductCart,
                          Breed, Category, CartSummary
                          )
 
@@ -74,7 +74,6 @@ admin.site.register(AnimalWhislist, admin.ModelAdmin)
 admin.site.register(Adoption, admin.ModelAdmin)
 admin.site.register(ProductWhislist, admin.ModelAdmin)
 admin.site.register(ProductCart, admin.ModelAdmin)
-admin.site.register(ProductSales, admin.ModelAdmin)
 admin.site.register(Breed, admin.ModelAdmin)
 admin.site.register(Category, admin.ModelAdmin)
 admin.site.register(CartSummary, admin.ModelAdmin)

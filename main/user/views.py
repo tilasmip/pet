@@ -10,11 +10,9 @@ from .serializer import (UserRegistrationSerializer,
                          )
 
 from main.renderers import UserRenderer
-import datetime
 from django.contrib.auth import authenticate, logout
-from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import IsAuthenticated
 
 
 def get_tokens_for_user(user):

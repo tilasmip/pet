@@ -1,8 +1,6 @@
 from rest_framework import serializers
 from django.db.models import Q
-from main.models import Animal, Category, Breed, ProductWhislist, AnimalWhislist, Product
-from django.utils.encoding import smart_str, force_bytes, DjangoUnicodeDecodeError
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from main.models import Animal
 
 
 class SaveAnimalSerializer(serializers.ModelSerializer):

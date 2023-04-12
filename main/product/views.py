@@ -9,7 +9,7 @@ from .serializer import (
     RecentProductSerializer
 )
 from django.core import serializers
-
+import math
 from main.models import Product
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -37,7 +37,7 @@ class RecentProductView(APIView):
     serializer_class = RecentProductSerializer
 
     def to_object(self, data):
-        if(data.image.name is not None):
+        if (data.image.name is not None):
             name = data.image.name.split("/")[-1]
         else:
             name = ""
@@ -67,7 +67,7 @@ class GetProductView(generics.ListAPIView):
     parser_classes = []
 
     def to_object(self, data):
-        if(data.image.name is not None):
+        if (data.image.name is not None):
             name = data.image.name.split("/")[-1]
         else:
             name = ""
@@ -88,19 +88,23 @@ class GetProductView(generics.ListAPIView):
         pageNo = request.query_params.get('pageNo')
         category = request.query_params.get('category')
         order = request.query_params.get('order') == '1'
+        totalPage = 1
         if pageNo is None:
             pageNo = 1
+        else:
+            pageNo = int(pageNo)
         products = Product.objects.all()
         if (name is not None and name != ""):
             products = products.filter(name__icontains=name)
         if (category is not None and category != "0" and category != ""):
             products = products.filter(category__id=category)
+            totalPage = math.floor(len(products)/5)
         if (order is not None and order != "0" and order != ""):
             products = products.order_by(
-                '-price' if order == "1" else "price")[:5]
+                '-price' if order == "1" else "price")[(pageNo-1)*pageNo:pageNo*5]
         data = map(self.to_object, products)
 
-        return Response({'data': data}, status=status.HTTP_200_OK)
+        return Response({'data': data, 'total': totalPage}, status=status.HTTP_200_OK)
 
 # class UpdateProductView(APIView):
 #     queryset = Product.objects.all()

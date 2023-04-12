@@ -1,19 +1,17 @@
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet
 from rest_framework import generics
 from main.renderers import UserRenderer
 from .serializer import (SaveProductCartSerializer,
                          GetProductCartSerializer,
-                         UpdateProductCartSerializer,
+                         CompletePaymentSerializer,
                          DeleteProductCartSerializer,
-                         SaveCartSummarySerializer)
-from django.core import serializers
-
-from main.models import ProductCart
-from django.contrib.auth import authenticate
-from rest_framework_simplejwt.tokens import RefreshToken
+                         PurchaseInvoiceSerializer,
+                         ProceedPaymentSerilizer)
+from django.db.models import Q
+import json
+from main.models import ProductCart, CartSummary
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 
@@ -22,32 +20,100 @@ class SaveProductCartView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, format=None):
+
         data = {
-            "user": request.user.id,
             "product": request.data.get("product_id"),
             "quantity": request.data.get("quantity", 1),
         }
-        serializer = SaveProductCartSerializer(data=data)
+        serializer = SaveProductCartSerializer(
+            data=data, context={'user': request.user})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({'msg': 'Success.'}, status=status.HTTP_201_CREATED)
 
 
-class SaveCartSummary(APIView):
+class ProceedPaymentView(APIView):
     renderer_classes = [UserRenderer]
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, format=None):
+    def put(self, request, pk, format=None):
         data = {
-            "user": request.user.id,
-            "amount": request.data.get("amount"),
             "shipping_address": request.data.get("shipping_address"),
             "additional_info": request.data.get("additional_info"),
         }
-        serializer = SaveCartSummarySerializer(data=data)
+        cart_data = request.data.get('cart_data')
+        if (cart_data is None):
+            return Response({'msg': 'No cart data found.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        instance = CartSummary.objects.get(
+            id=pk, sold=False, user=request.user)
+        serializer = ProceedPaymentSerilizer(
+            instance=instance, data=data, context={'id': pk}, partial=True)
         serializer.is_valid(raise_exception=True)
-        instance = serializer.save()
-        return Response({'msg': instance.id}, status=status.HTTP_201_CREATED)
+        for cart in cart_data:
+            cart_id = cart.get('id')
+            cart_rate = cart.get('rate')
+            cart_quantity = cart.get('quantity')
+            item = ProductCart.objects.filter(Q(id=cart_id)).first()
+            if item is not None:
+                item.rate = cart_rate
+                item.quantity = cart_quantity
+                item.save()
+        serializer.save()
+
+        return Response({'msg': 'Shipping address updated successfully.'})
+
+
+class CompletePaymentView(APIView):
+    renderer_classes = [UserRenderer]
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, pk, format=None):
+        summary = CartSummary.objects.filter(
+            Q(id=pk) & Q(sold=False)).first()
+        if (summary is None):
+            return Response({'msg': 'Invalid request. No summary'}, status=status.HTTP_400_BAD_REQUEST)
+        refId = request.data.get("referenceId")
+        data = {
+            "reference_id": refId,
+            "sold": True
+        }
+        serializer = CompletePaymentSerializer(
+            data=data, instance=summary, partial=True)
+        serializer.is_valid(raise_exception=True)
+        for item in summary.cart_details():
+            item.product.stock -= item.quantity
+            item.product.save()
+        serializer.save()
+        return Response({'data': summary.id})
+
+
+class PurchaseInvoiceView(APIView):
+    renderer_classes = [UserRenderer]
+    permission_classes = [IsAuthenticated]
+
+    def to_object(self, data):
+        return {
+            'user': self.request.user.name,
+            'product': data.product.name,
+            'amount': str((data.quantity * data.rate)),
+            'rate': str(data.rate),
+            'quantity': str(data.quantity),
+            'id': str(data.id)
+        }
+
+    def get(self, request, id, format=None):
+        renderer_classes = [UserRenderer]
+        permission_classes = [IsAuthenticated]
+        serializer = PurchaseInvoiceSerializer(
+            data=request.data, context={'user': request.user.id, 'id': id})
+        serializer.is_valid(raise_exception=True)
+        data = []
+        out = serializer.get_queryset()
+        for item in out:
+            data.append(self.to_object(item))
+
+        return Response({'data': data}, status=status.HTTP_200_OK)
 
 
 class GetProductCartView(generics.ListAPIView):
@@ -60,8 +126,8 @@ class GetProductCartView(generics.ListAPIView):
             name = ""
         print(data.product.image)
         return {
-            'user_id': data.user.id,
-            'user': data.user.name,
+            'user_id': self.request.user.id,
+            'user': self.request.user.name,
             'image': name,
             'category': data.product.category.name,
             'product': data.product.name,
@@ -74,26 +140,30 @@ class GetProductCartView(generics.ListAPIView):
     def get(self, request, format=None):
         renderer_classes = [UserRenderer]
         permission_classes = [IsAuthenticated]
-        serializer = GetProductCartSerializer(
-            data=request.data, context={'user': request.user.id})
-        serializer.is_valid(raise_exception=True)
-        data = map(self.to_object, serializer.get_queryset())
+        user = request.user
+        # id = request.data.get('id')
+        summary = CartSummary.objects.filter(
+            Q(user=user) & Q(sold=False)).first()
+        if summary is None:
+            return Response({'data': []}, status=status.HTTP_200_OK)
 
-        return Response({'data': data}, status=status.HTTP_200_OK)
+        data = map(self.to_object, summary.cart_details())
+
+        return Response({'data': data, 'id': summary.id}, status=status.HTTP_200_OK)
 
 
-class UpdateProductCartView(APIView):
-    queryset = ProductCart.objects.all()
-    renderer_classes = [UserRenderer]
-    permission_classes = [IsAuthenticated]
+# class UpdateProductCartView(APIView):
+#     queryset = ProductCart.objects.all()
+#     renderer_classes = [UserRenderer]
+#     permission_classes = [IsAuthenticated]
 
-    def put(self, request, pk, format=None):
-        instance = ProductCart.objects.get(id=pk)
-        serializer = UpdateProductCartSerializer(
-            instance=instance, data=request.data, context={'id': pk}, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response({'msg': 'ProductCart updated successfully.'})
+#     def put(self, request, pk, format=None):
+#         instance = ProductCart.objects.get(id=pk)
+#         serializer = UpdateProductCartSerializer(
+#             instance=instance, data=request.data, context={'id': pk}, partial=True)
+#         serializer.is_valid(raise_exception=True)
+#         serializer.save()
+#         return Response({'msg': 'ProductCart updated successfully.'})
 
 
 class DeleteProductCartView(APIView):

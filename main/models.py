@@ -172,8 +172,10 @@ class ProductWhislist(models.Model):
 
 
 class AnimalWhislist(models.Model):
-    user = models.ForeignKey(User, on_delete=models.RESTRICT)
-    animal = models.ForeignKey(Animal, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        User, on_delete=models.RESTRICT, related_name="whislists")
+    animal = models.ForeignKey(
+        Animal, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -182,39 +184,34 @@ class AnimalWhislist(models.Model):
 
 
 class CartSummary(models.Model):
-    user = models.ForeignKey(User, blank=True, on_delete=models.CASCADE)
-    shipping_address = models.CharField(max_length=255)
-    additional_info = models.CharField(max_length=255)
-    processing = models.BooleanField(default=True)
-    amount = models.DecimalField(
-        decimal_places=2, max_digits=10, default=100, null=True)
+    user = models.ForeignKey(
+        User, blank=True, on_delete=models.CASCADE, related_name="carts")
+    shipping_address = models.CharField(max_length=255, null=True)
+    additional_info = models.CharField(max_length=255, null=True)
+    sold = models.BooleanField(default=True)
+    reference_id = models.CharField(max_length=20, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return f'{len(self.cart_details())} items of Rs. {self.amount()}'
+
+    def cart_details(self):
+        return self.details.all()
+
+    def amount(self):
+        return sum((item.quantity * item.product.price) for item in self.cart_details())
+
 
 class ProductCart(models.Model):
-    user = models.ForeignKey(User, on_delete=models.RESTRICT)
-    product = models.ForeignKey(Product, on_delete=models.RESTRICT)
+    product = models.ForeignKey(
+        Product, on_delete=models.RESTRICT, related_name="carts")
     quantity = models.DecimalField(decimal_places=2, max_digits=10)
-
+    rate = models.DecimalField(decimal_places=2, max_digits=10, default=0)
     cart_summary = models.ForeignKey(
-        CartSummary, blank=True, null=True, on_delete=models.CASCADE)
+        CartSummary, blank=True, null=True, on_delete=models.CASCADE, related_name="details")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f'{self.product.name} x {self.quantity}'
-
-
-class ProductSales(models.Model):
-    user = models.ForeignKey(User, on_delete=models.RESTRICT)
-    product = models.ForeignKey(Product, on_delete=models.RESTRICT)
-    quantity = models.DecimalField(decimal_places=2, max_digits=10)
-    cupon_id = models.CharField(max_length=20)
-    amount = models.DecimalField(decimal_places=2, max_digits=10)
-    referenceId = models.CharField(max_length=50)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f'{self.product.name} at Rs.{self.amount}'
