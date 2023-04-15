@@ -101,7 +101,7 @@ class GetProductView(generics.ListAPIView):
             totalPage = math.floor(len(products)/5)
         if (order is not None and order != "0" and order != ""):
             products = products.order_by(
-                '-price' if order == "1" else "price")[(pageNo-1)*pageNo:pageNo*5]
+                '-price' if order == True else "price")[(pageNo-1)*pageNo:pageNo*5]
         data = map(self.to_object, products)
 
         return Response({'data': data, 'total': totalPage}, status=status.HTTP_200_OK)

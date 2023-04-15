@@ -10,7 +10,7 @@ from .serializer import (SaveAnimalSerializer,
 from django.core import serializers
 from main.enums import Gender
 
-from main.models import Animal, AnimalWhislist
+from main.models import Animal, AnimalWishlist
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
@@ -76,7 +76,7 @@ class GetRecentAnimalView(generics.ListAPIView):
             'category': data.category.name,
             'id': data.id,
         }
-    queryset = Animal.objects.all()
+    queryset = Animal.objects.filter(approve_post=True)
 
     def get(self, request, format=None):
         renderer_classes = [UserRenderer]
@@ -89,16 +89,16 @@ class GetRecentAnimalView(generics.ListAPIView):
 
 class DetailAnimalView(APIView):
     queryset = Animal.objects.all()
-    animal_whislist = []
+    animal_wishlist = []
 
     def get(self, request, id):
         if id is not None:
             data = Animal.objects.filter(id=id).first()
             if request.user.is_authenticated:
-                whislist = AnimalWhislist.objects.filter(
+                wishlist = AnimalWishlist.objects.filter(
                     user=request.user)
-                for item in whislist:
-                    self.animal_whislist.append(item.animal.id)
+                for item in wishlist:
+                    self.animal_wishlist.append(item.animal.id)
             if (data.image.name is not None):
                 name = data.image.name.split("/")[-1]
             else:
@@ -117,7 +117,7 @@ class DetailAnimalView(APIView):
                 'postedBy': data.posted_by.email,
                 'addedDate': data.created_at,
                 'id': data.id,
-                'love': self.animal_whislist is not None and data.id in self.animal_whislist,
+                'love': self.animal_wishlist is not None and data.id in self.animal_wishlist,
             }
             return Response({'data': result})
         raise serializers.SerializerDoesNotExist()
@@ -125,7 +125,7 @@ class DetailAnimalView(APIView):
 
 class GetAnimalView(generics.ListAPIView):
     parser_classes = []
-    animal_whislist = []
+    animal_wishlist = []
 
     def to_object(self, data):
         if (data.image.name is not None):
@@ -148,7 +148,7 @@ class GetAnimalView(generics.ListAPIView):
             'addedDate': data.created_at,
             'id': data.id,
             'deletable': True if data in animals else False,
-            'love': self.animal_whislist is not None and data.id in self.animal_whislist,
+            'love': self.animal_wishlist is not None and data.id in self.animal_wishlist,
         }
 
     def purify(self, value):
@@ -157,7 +157,7 @@ class GetAnimalView(generics.ListAPIView):
         return value or None
 
     def get_queryset(self, request):
-        animals = Animal.objects.all()
+        animals = Animal.objects.filter(approve_post=True)
         breed = self.purify(request.GET.get('breed'))
         if breed is not None:
             animals = animals.filter(breed__id=breed)
@@ -188,7 +188,6 @@ class GetAnimalView(generics.ListAPIView):
         if gender is not None and gender != "0":
             gender = getattr(Gender, gender.strip())
             animals = animals.filter(gender=gender)
-            print(len(animals), gender)
         search = self.purify(request.GET.get('search'))
         if search is not None:
             animals = animals.filter(name__icontains=search)
@@ -209,11 +208,13 @@ class GetAnimalView(generics.ListAPIView):
 
     def get(self, request, format=None):
         renderer_classes = [UserRenderer]
+        self.animal_wishlist = []
         if request.user.is_authenticated:
-            whislist = AnimalWhislist.objects.filter(
+            wishlist = AnimalWishlist.objects.filter(
                 user=request.user)
-            for item in whislist:
-                self.animal_whislist.append(item.animal.id)
+            for item in wishlist:
+                self.animal_wishlist.append(item.animal.id)
+
         data = map(self.to_object, self.get_queryset(request))
 
         return Response({'data': data}, status=status.HTTP_200_OK)

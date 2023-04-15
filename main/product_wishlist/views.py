@@ -3,13 +3,13 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework import generics
 from main.renderers import UserRenderer
-from .serializer import (SaveProductWhislistSerializer,
-                         GetProductWhislistSerializer,
-                         DeleteProductWhislistSerializer)
+from .serializer import (SaveProductWishlistSerializer,
+                         GetProductWishlistSerializer,
+                         DeleteProductWishlistSerializer)
 from rest_framework.permissions import IsAuthenticated
 
 
-class SaveProductWhislistView(APIView):
+class SaveProductWishlistView(APIView):
     renderer_classes = [UserRenderer]
     permission_classes = [IsAuthenticated]
 
@@ -18,13 +18,13 @@ class SaveProductWhislistView(APIView):
             "user": request.user.id,
             "product": request.data.get("product_id"),
         }
-        serializer = SaveProductWhislistSerializer(data=data)
+        serializer = SaveProductWishlistSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({'msg': 'Success.'}, status=status.HTTP_201_CREATED)
 
 
-class GetProductWhislistView(generics.ListAPIView):
+class GetProductWishlistView(generics.ListAPIView):
     parser_classes = []
 
     def to_object(self, data):
@@ -37,20 +37,20 @@ class GetProductWhislistView(generics.ListAPIView):
 
     def get(self, request, format=None):
         renderer_classes = [UserRenderer]
-        serializer = GetProductWhislistSerializer(data=request.data)
+        serializer = GetProductWishlistSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = map(self.to_object, serializer.get_queryset())
 
         return Response({'data': data}, status=status.HTTP_200_OK)
 
 
-class DeleteProductWhislistView(APIView):
+class DeleteProductWishlistView(APIView):
     renderer_classes = [UserRenderer]
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, pk, format=None):
-        serializer = DeleteProductWhislistSerializer(
+        serializer = DeleteProductWishlistSerializer(
             data=request.data, context={'id': pk, 'user': request.user})
         serializer.is_valid(raise_exception=True)
-        serializer.delete_product_whislist()
-        return Response({'msg': 'ProductWhislist deleted successfully.'})
+        serializer.delete_product_wishlist()
+        return Response({'msg': 'ProductWishlist deleted successfully.'})

@@ -87,8 +87,9 @@ class DeleteBreedSerializer(serializers.Serializer):
 class GetBreedSerializer(serializers.Serializer):
 
     def get_queryset(self):
-        pageNo = self.data.get('pageNo')
-        if pageNo is None or pageNo <= 0:
-            pageNo = 1
-
-        return Breed.objects.all()[(pageNo-1)*10:pageNo*10]
+        breeds = Breed.objects.all()
+        category = self.context.get('category')
+        print("Category", category)
+        if category is not None and category != "":
+            breeds = breeds.filter(category__id=category)
+        return breeds

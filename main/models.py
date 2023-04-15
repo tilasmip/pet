@@ -117,6 +117,7 @@ class Animal(models.Model):
     gender = models.CharField(
         max_length=10, choices=Gender.choices(), default=Gender.MALE)
     image = models.ImageField(upload_to="documents/images/animals", blank=True)
+    approve_post = models.BooleanField(default=False)
     adopted = models.BooleanField(default=False)
     popularity = models.IntegerField(blank=True, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -161,7 +162,7 @@ class Product(models.Model):
         return f'{self.name} at Rs. {self.price}'
 
 
-class ProductWhislist(models.Model):
+class ProductWishlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.RESTRICT)
     product = models.ForeignKey(Product, on_delete=models.RESTRICT)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -171,9 +172,9 @@ class ProductWhislist(models.Model):
         return f'{self.product.name} for {self.user.name}'
 
 
-class AnimalWhislist(models.Model):
+class AnimalWishlist(models.Model):
     user = models.ForeignKey(
-        User, on_delete=models.RESTRICT, related_name="whislists")
+        User, on_delete=models.RESTRICT, related_name="wishlists")
     animal = models.ForeignKey(
         Animal, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -188,7 +189,7 @@ class CartSummary(models.Model):
         User, blank=True, on_delete=models.CASCADE, related_name="carts")
     shipping_address = models.CharField(max_length=255, null=True)
     additional_info = models.CharField(max_length=255, null=True)
-    sold = models.BooleanField(default=True)
+    sold = models.BooleanField(default=False)
     reference_id = models.CharField(max_length=20, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

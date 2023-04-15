@@ -4,18 +4,18 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import generics
 from main.renderers import UserRenderer
-from .serializer import (SaveAnimalWhislistSerializer,
-                         GetAnimalWhislistSerializer,
-                         DeleteAnimalWhislistSerializer)
+from .serializer import (SaveAnimalWishlistSerializer,
+                         GetAnimalWishlistSerializer,
+                         DeleteAnimalWishlistSerializer)
 from django.core import serializers
 
-from main.models import AnimalWhislist
+from main.models import AnimalWishlist
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 
-class SaveAnimalWhislistView(APIView):
+class SaveAnimalWishlistView(APIView):
     renderer_classes = [UserRenderer]
     permission_classes = [IsAuthenticated]
 
@@ -24,13 +24,13 @@ class SaveAnimalWhislistView(APIView):
             "user": request.user.id,
             "animal": request.data.get("animal_id"),
         }
-        serializer = SaveAnimalWhislistSerializer(data=data)
+        serializer = SaveAnimalWishlistSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({'msg': 'Success.'}, status=status.HTTP_201_CREATED)
 
 
-class GetAnimalWhislistView(generics.ListAPIView):
+class GetAnimalWishlistView(generics.ListAPIView):
     parser_classes = []
     renderer_classes = [UserRenderer]
     permission_classes = [IsAuthenticated]
@@ -51,7 +51,7 @@ class GetAnimalWhislistView(generics.ListAPIView):
         }
 
     def get(self, request, format=None):
-        serializer = GetAnimalWhislistSerializer(
+        serializer = GetAnimalWishlistSerializer(
             data=request.data, context={'user': request.user})
         serializer.is_valid(raise_exception=True)
         result = serializer.get_queryset()
@@ -62,13 +62,13 @@ class GetAnimalWhislistView(generics.ListAPIView):
         return Response({'data': data}, status=status.HTTP_200_OK)
 
 
-class DeleteAnimalWhislistView(APIView):
+class DeleteAnimalWishlistView(APIView):
     renderer_classes = [UserRenderer]
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, pk, format=None):
-        serializer = DeleteAnimalWhislistSerializer(
+        serializer = DeleteAnimalWishlistSerializer(
             data=request.data, context={'id': pk, 'user': request.user})
         serializer.is_valid(raise_exception=True)
-        serializer.delete_animal_whislist()
-        return Response({'msg': 'AnimalWhislist deleted successfully.'})
+        serializer.delete_animal_wishlist()
+        return Response({'msg': 'AnimalWishlist deleted successfully.'})

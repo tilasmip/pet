@@ -1,6 +1,6 @@
 from django.contrib import admin
-from main.models import (User, Product, Animal, ProductWhislist,
-                         AnimalWhislist, Adoption, ProductCart,
+from main.models import (User, Product, Animal, ProductWishlist,
+                         AnimalWishlist, Adoption, ProductCart,
                          Breed, Category, CartSummary
                          )
 
@@ -70,9 +70,9 @@ class ProductModelAdmin(admin.ModelAdmin):
 
 admin.site.register(Product, ProductModelAdmin)
 admin.site.register(Animal, admin.ModelAdmin)
-admin.site.register(AnimalWhislist, admin.ModelAdmin)
+admin.site.register(AnimalWishlist, admin.ModelAdmin)
 admin.site.register(Adoption, admin.ModelAdmin)
-admin.site.register(ProductWhislist, admin.ModelAdmin)
+admin.site.register(ProductWishlist, admin.ModelAdmin)
 admin.site.register(ProductCart, admin.ModelAdmin)
 admin.site.register(Breed, admin.ModelAdmin)
 admin.site.register(Category, admin.ModelAdmin)

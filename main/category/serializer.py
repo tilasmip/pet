@@ -71,8 +71,5 @@ class DeleteCategorySerializer(serializers.Serializer):
 class GetCategorySerializer(serializers.Serializer):
 
     def get_queryset(self):
-        pageNo = self.data.get('pageNo')
-        if pageNo is None or pageNo <= 0:
-            pageNo = 1
 
-        return Category.objects.all()[(pageNo-1)*10:pageNo*10]
+        return Category.objects.all()
