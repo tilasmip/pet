@@ -47,7 +47,7 @@ class User(AbstractBaseUser):
     )
     gender = models.CharField(max_length=10, null=True,
                               blank=True, choices=Gender.choices())
-    address = models.CharField(max_length=10, null=True,
+    address = models.CharField(max_length=100, null=True,
                                blank=True, default="Nepal")
     mobile = models.CharField(max_length=15)
     name = models.CharField(max_length=50)

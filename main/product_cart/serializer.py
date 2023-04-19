@@ -78,6 +78,9 @@ class PurchaseInvoiceSerializer(serializers.Serializer):
 
     def get_queryset(self):
         user_id = self.context.get('user')
+        print(user_id,"userId")
+        if (user_id is None or user_id == ""):
+            raise serializers.ValidationError({'msg': 'Authorization failed.'})
         id = self.context.get('id')
         print(user_id, id)
         try:

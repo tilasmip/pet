@@ -88,6 +88,8 @@ class GetProductView(generics.ListAPIView):
         pageNo = request.query_params.get('pageNo')
         category = request.query_params.get('category')
         order = request.query_params.get('order') == '1'
+        print(name, "name", pageNo, "pageNo",
+              category, "cat", order, "Filter data")
         totalPage = 1
         if pageNo is None:
             pageNo = 1
