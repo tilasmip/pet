@@ -145,4 +145,4 @@ class UserIsAuthenticatedView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        return Response({'email': request.user.email, 'mobile': request.user.mobile}, status=status.HTTP_200_OK)
+        return Response({'email': request.user.email, 'mobile': request.user.mobile,'admin':self.request.user.is_superuser}, status=status.HTTP_200_OK)

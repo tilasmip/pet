@@ -6,6 +6,9 @@ from rest_framework import generics
 from main.renderers import UserRenderer
 from .serializer import (
     GetProductSerializer,
+    SaveProductSerializer,
+    UpdateProductSerializer,
+    DeleteProductSerializer,
     RecentProductSerializer
 )
 from django.core import serializers
@@ -15,22 +18,24 @@ from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
-# class SaveProductView(APIView):
-#     renderer_classes = [UserRenderer]
-#     permission_classes=[IsAuthenticated,IsAdminUser]
-#     def post(self,request, format=None):
-#         data = {
-#             "name": request.data.get("name"),
-#             "category":request.data.get("category_id"),
-#             "description":request.data.get("description"),
-#             "image":request.FILES.get("image"),
-#             "price":request.data.get('price'),
-#             'stock':request.data.get('stock'),
-#         }
-#         serializer = SaveProductSerializer(data = data)
-#         serializer.is_valid(raise_exception=True)
-#         serializer.save()
-#         return Response({'msg':'Success.'},status = status.HTTP_201_CREATED)
+
+class SaveProductView(APIView):
+    renderer_classes = [UserRenderer]
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def post(self, request, format=None):
+        data = {
+            "name": request.data.get("name"),
+            "category": request.data.get("category"),
+            "description": request.data.get("description"),
+            "image": request.FILES.get("image"),
+            "price": request.data.get('price'),
+            'stock': request.data.get('stock'),
+        }
+        serializer = SaveProductSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({'msg': 'Success.'}, status=status.HTTP_201_CREATED)
 
 
 class RecentProductView(APIView):
@@ -58,7 +63,7 @@ class RecentProductView(APIView):
         renderer_classes = [UserRenderer]
         serializer = RecentProductSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        data = map(self.to_object, self.queryset.all())
+        data = map(self.to_object, self.queryset.order_by("-created_at")[:5])
 
         return Response({'data': data}, status=status.HTTP_200_OK)
 
@@ -108,22 +113,52 @@ class GetProductView(generics.ListAPIView):
 
         return Response({'data': data, 'total': totalPage}, status=status.HTTP_200_OK)
 
-# class UpdateProductView(APIView):
-#     queryset = Product.objects.all()
-#     renderer_classes = [UserRenderer]
-#     permission_classes=[IsAuthenticated,IsAdminUser]
-#     def put(self,request,pk,format = None):
-#         instance = Product.objects.get(id=pk)
-#         serializer = UpdateProductSerializer(instance = instance, data = request.data, context = {'id':pk}, partial = True)
-#         serializer.is_valid(raise_exception=True)
-#         serializer.save()
-#         return Response({'msg':'Product updated successfully.'})
 
-# class DeleteProductView(APIView):
-#     renderer_classes = [UserRenderer]
-#     permission_classes=[IsAuthenticated, IsAdminUser]
-#     def delete(self,request,pk,format = None):
-#         serializer = DeleteProductSerializer(data = request.data, context = {'id':pk})
-#         serializer.is_valid(raise_exception=True)
-#         serializer.delete_product()
-#         return Response({'msg':'Product deleted successfully.'})
+class UpdateProductView(APIView):
+    queryset = Product.objects.all()
+    renderer_classes = [UserRenderer]
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def to_object(self, data):
+        if (data.image.name is not None):
+            name = data.image.name.split("/")[-1]
+        else:
+            name = ""
+        return {
+            'description': data.description,
+            'name': data.name,
+            'price': str(data.price),
+            'image': name,
+            'category': data.category.name,
+            'category_id': data.category.id,
+            'id': data.id,
+            'stock': str(data.stock)
+        }
+
+    def put(self, request, pk, format=None):
+        instance = Product.objects.get(id=pk)
+        serializer = UpdateProductSerializer(
+            instance=instance, data=request.data, context={'id': pk}, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({'msg': 'Product updated successfully.'})
+
+    def get(self, request, pk, format=None):
+        try:
+            instance = self.queryset.get(id=pk)
+        except:
+            return Response({'msg': 'Data not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response({'data': self.to_object(instance)}, status=status.HTTP_200_OK)
+
+
+class DeleteProductView(APIView):
+    renderer_classes = [UserRenderer]
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def delete(self, request, pk, format=None):
+        serializer = DeleteProductSerializer(
+            data=request.data, context={'id': pk})
+        serializer.is_valid(raise_exception=True)
+        serializer.delete_product()
+        return Response({'msg': 'Product deleted successfully.'})
