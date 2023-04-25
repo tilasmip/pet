@@ -51,33 +51,46 @@ class UpdateAnimalSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Animal
-        fields = ['description', 'category', 'breed', 'image', 'popularity']
+        fields = ['description', 'category', 'breed', 'likes',
+                  'personality', 'gender', 'age', 'name', 'approve_post',]
 
     def validate(self, attrs):
-        # id = self.context.get('id')
-        # categoryId = attrs.get('category_id')
-        # name = self.initial_data.get('name')
-        # dup_Animal = Animal.objects.filter(~Q(id=id)&Q(name=name)).first()
-        # try:
-        #     self.animal = Animal.objects.get(id=id)
-        #     if self.animal is None:
-        #         raise serializers.ValidationError({'msg':'Animal doesn\'t exist.'})
-        # except:
-        #     raise serializers.ValidationError({'msg':'Animal doesn\'t exist.'})
-        # if dup_Animal is not None:
-        #     raise serializers.ValidationError({'msg':'Animal with the name already exists.'})
-        # categories = Category.objects.filter(id = categoryId)
-        # if categories.exists():
-        #     self.category = categories.first()
-        # else:
-        #     raise serializers.ValidationError({'msg':'Please selet a valid category.'})
         return attrs
 
     def update(self, instance, validated_data):
-        instance.image = validated_data.get('image')
-        instance.breed = validated_data.get('breed')
-        instance.category = validated_data.get('category')
-        instance.description = validated_data.get('description')
+       return super().update(instance, validated_data)
+
+
+class ApprovePostAnimalSerializer(serializers.ModelSerializer):
+    animal = None
+    category = None
+
+    class Meta:
+        model = Animal
+        fields = ['approve_post']
+
+    def validate(self, attrs):
+        return attrs
+
+    def update(self, instance, validated_data):
+        instance.approve_post = validated_data.get('approve_post')
+        instance.save()
+        return instance
+
+
+class ApproveAdoptionSerializer(serializers.ModelSerializer):
+    animal = None
+    category = None
+
+    class Meta:
+        model = Animal
+        fields = ['adopted']
+
+    def validate(self, attrs):
+        return attrs
+
+    def update(self, instance, validated_data):
+        instance.adopted = validated_data.get('adopted')
         instance.save()
         return instance
 

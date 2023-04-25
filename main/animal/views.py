@@ -6,6 +6,8 @@ from rest_framework import generics
 from main.renderers import UserRenderer
 from .serializer import (SaveAnimalSerializer,
                          UpdateAnimalSerializer,
+                         ApprovePostAnimalSerializer,
+                         ApproveAdoptionSerializer,
                          DeleteAnimalSerializer)
 from django.core import serializers
 from main.enums import Gender
@@ -220,14 +222,182 @@ class GetAnimalView(generics.ListAPIView):
         return Response({'data': data}, status=status.HTTP_200_OK)
 
 
+class GetAdminAnimalView(generics.ListAPIView):
+    parser_classes = []
+    animal_wishlist = []
+
+    def to_object(self, data):
+        if (data.image.name is not None):
+            name = data.image.name.split("/")[-1]
+        else:
+            name = ""
+        animals = Animal.objects.filter(posted_by=self.request.user)
+        return {
+            'description': data.description,
+            'breed': data.breed.name,
+            "popularity": data.popularity,
+            "personality": data.personality,
+            "likes": data.likes,
+            "name": data.name,
+            "age": data.age,
+            "gender": data.gender,
+            'image': name,
+            'category': data.category.name,
+            'postedBy': data.posted_by.email,
+            'addedDate': data.created_at,
+            'id': data.id,
+            'deletable': True if data in animals else False,
+            'love': self.animal_wishlist is not None and data.id in self.animal_wishlist,
+            'approved': data.approve_post,
+            'adopted': data.adopted,
+        }
+
+    def purify(self, value):
+        if value is not None:
+            value = value.strip()
+        return value or None
+
+    def get_queryset(self, request):
+        animals = Animal.objects.all()
+        breed = self.purify(request.GET.get('breed'))
+        if breed is not None:
+            animals = animals.filter(breed__id=breed)
+
+        category = self.purify(request.GET.get('category'))
+        if category is not None:
+            animals = animals.filter(category__id=category)
+
+        age = self.purify(request.GET.get('age'))
+        if age is not None:
+            age = int(age)
+            if age > 0 and age <= 6:
+                match age:
+                    case 1:
+                        animals = animals.filter(age__lte=3)
+                    case 2:
+                        animals = animals.filter(age__lte=6)
+                    case 3:
+                        animals = animals.filter(age__lte=9)
+                    case 4:
+                        animals = animals.filter(age__lte=12)
+                    case 5:
+                        animals = animals.filter(age__lte=15)
+                    case 6:
+                        animals = animals.filter(age__gte=15)
+
+        gender = self.purify(request.GET.get('gender'))
+        if gender is not None and gender != "0":
+            gender = getattr(Gender, gender.strip())
+            animals = animals.filter(gender=gender)
+        search = self.purify(request.GET.get('search'))
+        if search is not None:
+            animals = animals.filter(name__icontains=search)
+
+        pouplarity = self.purify(request.GET.get('popularity'))
+        if pouplarity == 2 or pouplarity == 1:
+            if pouplarity == 2:
+                animals = animals.order_by("popularity") or None
+            else:
+                animals = animals.order_by("-popularity") or None
+
+        pageNo = self.purify(request.GET.get('pageNo'))
+
+        if pageNo is None or pageNo <= 0:
+            pageNo = 1
+        animals = animals[(pageNo-1)*10:pageNo*10]
+        return animals
+
+    def get(self, request, format=None):
+        renderer_classes = [UserRenderer]
+        self.animal_wishlist = []
+        if request.user.is_authenticated:
+            wishlist = AnimalWishlist.objects.filter(
+                user=request.user)
+            for item in wishlist:
+                self.animal_wishlist.append(item.animal.id)
+
+        data = map(self.to_object, self.get_queryset(request))
+
+        return Response({'data': data}, status=status.HTTP_200_OK)
+
+
 class UpdateAnimalView(APIView):
     queryset = Animal.objects.all()
     renderer_classes = [UserRenderer]
     permission_classes = [IsAuthenticated]
 
+    def to_object(self, data):
+        if (data.image.name is not None):
+            name = data.image.name.split("/")[-1]
+        else:
+            name = ""
+        animals = Animal.objects.filter(posted_by=self.request.user)
+        return {
+            'description': data.description,
+            'breed': data.breed.name,
+            "popularity": data.popularity,
+            "personality": data.personality,
+            "likes": data.likes,
+            "name": data.name,
+            "age": str(data.age),
+            "gender": data.gender,
+            'image': name,
+            'breed': data.breed.id,
+            'category': data.category.id,
+            'postedBy': data.posted_by.email,
+            'addedDate': str(data.created_at),
+            'id': data.id,
+            'deletable': True if data in animals else False,
+            'approved': data.approve_post,
+            'adopted': data.adopted,
+        }
+
     def put(self, request, pk, format=None):
         instance = Animal.objects.get(id=pk)
         serializer = UpdateAnimalSerializer(
+            instance=instance, data=request.data, context={'id': pk}, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({'msg': 'Animal updated successfully.'})
+
+    def get(self, request, pk):
+        if id is not None:
+            data = Animal.objects.filter(id=pk).first()
+            if request.user.is_authenticated:
+                wishlist = AnimalWishlist.objects.filter(
+                    user=request.user)
+                for item in wishlist:
+                    self.animal_wishlist.append(item.animal.id)
+            if (data.image.name is not None):
+                name = data.image.name.split("/")[-1]
+            else:
+                name = ""
+            result = self.to_object(data)
+            return Response({'data': result})
+        raise serializers.SerializerDoesNotExist()
+
+
+class PostAproveView(APIView):
+    queryset = Animal.objects.all()
+    renderer_classes = [UserRenderer]
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def put(self, request, pk, format=None):
+        instance = Animal.objects.get(id=pk)
+        serializer = ApprovePostAnimalSerializer(
+            instance=instance, data=request.data, context={'id': pk}, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({'msg': 'Animal updated successfully.'})
+
+
+class AproveAdoption(APIView):
+    renderer_classes = [UserRenderer]
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def put(self, request, pk, format=None):
+        instance = Animal.objects.get(id=pk)
+        serializer = ApproveAdoptionSerializer(
             instance=instance, data=request.data, context={'id': pk}, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
