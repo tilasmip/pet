@@ -6,6 +6,8 @@ from rest_framework import generics
 from main.renderers import UserRenderer
 from .serializer import (SaveAdoptionSerializer,
                          DeleteAdoptionSerializer,
+                         RejectAdoptionSerializer,
+                         AcceptAdoptionSerializer,
                          UpdateAdoptionSerializer)
 from django.core import serializers
 
@@ -32,6 +34,56 @@ class SaveAdoptionView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({'msg': 'Success.'}, status=status.HTTP_201_CREATED)
+
+
+class GetAdoptionView(APIView):
+    queryset = Adoption.objects.all()
+    renderer_classes = [UserRenderer]
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def to_object(self, data):
+        print(data, "result")
+        result = {
+            'name': data.animal.name,
+            'requestedBy': data.requested_by.email,
+            'requestDate': str(data.created_at),
+            'message': data.message
+        }
+        return result
+
+    def get(self, request, format=None):
+        requestList = []
+        for request in self.queryset.order_by("-status"):
+            requestList.append(self.to_object(request))
+        return Response({'data': requestList})
+
+
+class RejectdoptionView(APIView):
+    queryset = Adoption.objects.all()
+    renderer_classes = [UserRenderer]
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def put(self, request, pk, format=None):
+        instance = Adoption.objects.get(id=pk)
+        serializer = RejectAdoptionSerializer(
+            instance=instance, data=request.data, context={'id': pk, 'user': request.user}, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({'data': 'Adoption rejected successfully.'})
+
+
+class AcceptdoptionView(APIView):
+    queryset = Adoption.objects.all()
+    renderer_classes = [UserRenderer]
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def put(self, request, pk, format=None):
+        instance = Adoption.objects.get(id=pk)
+        serializer = AcceptAdoptionSerializer(
+            instance=instance, context={'id': pk, 'user': request.user}, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({'data': 'Adoption accepted successfully.'})
 
 
 class UpdateAdoptionView(APIView):

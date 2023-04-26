@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.db.models import Q
-from main.models import Adoption, Adoption
+from main.models import Adoption, Adoption, Animal
 from main.enums import AdoptionStatus
 
 
@@ -41,6 +41,39 @@ class UpdateAdoptionSerializer(serializers.ModelSerializer):
             print(instance.status)
             instance.status = validated_data.get('status')
         instance.message = validated_data.get('message')
+        instance.save()
+        return instance
+
+
+class AcceptAdoptionSerializer(serializers.Serializer):
+    animal = None
+
+    def validate(self, attrs):
+        if self.instance.animal.adopted == True:
+            raise serializers.ValidationError("No longer in hold.")
+
+        self.animal = self.instance.animal
+        if self.animal is None:
+            raise serializers.ValidationError("Animal not found.")
+        return attrs
+
+    def update(self, instance, validated_data):
+        requests = Adoption.objects.filter(
+            Q(animal=self.animal) & (id != instance.id))
+        for request in requests:
+            request.status = AdoptionStatus.REJECTED
+            request.save()
+        instance.status = AdoptionStatus.APPROVED
+        instance.save()
+        return instance
+
+
+class RejectAdoptionSerializer(serializers.Serializer):
+    def validate(self, attrs):
+        return attrs
+
+    def update(self, instance, validated_data):
+        instance.status = AdoptionStatus.REJECTED
         instance.save()
         return instance
 
