@@ -59,11 +59,11 @@ class AcceptAdoptionSerializer(serializers.Serializer):
 
     def update(self, instance, validated_data):
         requests = Adoption.objects.filter(
-            Q(animal=self.animal) & (id != instance.id))
+            Q(animal=self.animal) & ~Q(id=instance.id))
         for request in requests:
-            request.status = AdoptionStatus.REJECTED
+            request.status = "REJECTED"
             request.save()
-        instance.status = AdoptionStatus.APPROVED
+        instance.status = "APPROVED"
         instance.save()
         return instance
 
@@ -73,7 +73,7 @@ class RejectAdoptionSerializer(serializers.Serializer):
         return attrs
 
     def update(self, instance, validated_data):
-        instance.status = AdoptionStatus.REJECTED
+        instance.status = "REJECTED"
         instance.save()
         return instance
 

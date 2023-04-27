@@ -131,8 +131,8 @@ class Adoption(models.Model):
     requested_by = models.ForeignKey(
         User, on_delete=models.RESTRICT, related_name="requested_by", blank=True, default=1)
     animal = models.ForeignKey(
-        User, on_delete=models.RESTRICT)
-    status = models.CharField(max_length=25, choices=AdoptionStatus.choices())
+        Animal, on_delete=models.RESTRICT)
+    status = models.CharField(max_length=25, choices=AdoptionStatus.choices(), default = AdoptionStatus.PENDING)
     message = models.TextField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

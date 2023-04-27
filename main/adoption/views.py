@@ -42,11 +42,12 @@ class GetAdoptionView(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
 
     def to_object(self, data):
-        print(data, "result")
         result = {
+            'id': data.id,
             'name': data.animal.name,
             'requestedBy': data.requested_by.email,
             'requestDate': str(data.created_at),
+            'status':data.status,
             'message': data.message
         }
         return result
@@ -66,7 +67,7 @@ class RejectdoptionView(APIView):
     def put(self, request, pk, format=None):
         instance = Adoption.objects.get(id=pk)
         serializer = RejectAdoptionSerializer(
-            instance=instance, data=request.data, context={'id': pk, 'user': request.user}, partial=True)
+            instance=instance, data={id: pk}, context={'id': pk, 'user': request.user}, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({'data': 'Adoption rejected successfully.'})
@@ -80,7 +81,7 @@ class AcceptdoptionView(APIView):
     def put(self, request, pk, format=None):
         instance = Adoption.objects.get(id=pk)
         serializer = AcceptAdoptionSerializer(
-            instance=instance, context={'id': pk, 'user': request.user}, partial=True)
+            instance=instance, data={'id': pk}, context={'id': pk, 'user': request.user}, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({'data': 'Adoption accepted successfully.'})
