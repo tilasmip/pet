@@ -3,29 +3,6 @@ from django.db.models import Q
 from main.models import Breed, Category
 
 
-class SaveBreedSerializer(serializers.ModelSerializer):
-    category = None
-    category_id = serializers.IntegerField(required=True)
-
-    class Meta:
-        model = Breed
-        fields = ['name', 'category_id']
-
-    def validate(self, attrs):
-        category_id = attrs.get('category_id')
-        self.category = Category.objects.filter(id=category_id).first()
-        if self.category is None:
-            raise serializers.ValidationError(
-                {'msg': {'Category does not exits'}})
-        return attrs
-
-    def create_Breed(self):
-        name = self.validated_data.get('name')
-
-        breed = Breed(name=name, category=self.category)
-        breed.save()
-
-
 class UpdateBreedSerializer(serializers.ModelSerializer):
     breed = None
     category = None
@@ -63,6 +40,19 @@ class UpdateBreedSerializer(serializers.ModelSerializer):
         self.breed.category = self.category
         self.breed.name = name
         self.breed.save()
+
+
+class SaveBreedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Breed
+        fields = ('name', 'category',)
+
+    def validate(self, attrs):
+        return attrs
+
+    def create(self, validated_data):
+        print("creawteing")
+        return super().create(**validated_data)
 
 
 class DeleteBreedSerializer(serializers.Serializer):
