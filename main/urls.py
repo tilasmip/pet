@@ -1,10 +1,12 @@
 
 from django.urls import path, include
 from main.user.views import *
-from main.product import views
+from main.views import *
 
 urlpatterns = [
     path('user/', include('main.user.urls')),
+    path('admin/dashboard/', GetDashboardOverview.as_view(),
+         name="get dashboard detail"),
     path('product/', include('main.product.urls')),
     path('category/', include('main.category.urls')),
     path('breed/', include('main.breed.urls')),

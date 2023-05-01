@@ -325,6 +325,7 @@ class UpdateAnimalView(APIView):
     queryset = Animal.objects.all()
     renderer_classes = [UserRenderer]
     permission_classes = [IsAuthenticated]
+    animal_wishlist = []
 
     def to_object(self, data):
         if (data.image.name is not None):
@@ -363,15 +364,6 @@ class UpdateAnimalView(APIView):
     def get(self, request, pk):
         if id is not None:
             data = Animal.objects.filter(id=pk).first()
-            if request.user.is_authenticated:
-                wishlist = AnimalWishlist.objects.filter(
-                    user=request.user)
-                for item in wishlist:
-                    self.animal_wishlist.append(item.animal.id)
-            if (data.image.name is not None):
-                name = data.image.name.split("/")[-1]
-            else:
-                name = ""
             result = self.to_object(data)
             return Response({'data': result})
         raise serializers.SerializerDoesNotExist()
