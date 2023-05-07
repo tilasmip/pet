@@ -12,7 +12,9 @@ from .serializer import (UserRegistrationSerializer,
 from main.renderers import UserRenderer
 from django.contrib.auth import authenticate, logout
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
+
+from main.models import User
 
 
 def get_tokens_for_user(user):
@@ -147,3 +149,27 @@ class UserIsAuthenticatedView(APIView):
     def get(self, request):
         print(request.user, request.user.is_authenticated)
         return Response({'email': request.user.email, 'mobile': request.user.mobile, 'admin': request.user.is_admin}, status=status.HTTP_200_OK)
+
+
+def to_object(data):
+    return {
+        'name': data.name,
+        'email': data.email,
+        'phone': data.mobile,
+        'isActive': data.is_active,
+        'id': data.id
+    }
+
+
+class UserGetView(APIView):
+    renderer_classes = [UserRenderer]
+    permission_classes = [IsAuthenticated, IsAdminUser]
+    queryset = User.objects.all()
+
+    def get(self, request, format=None):
+        fitlers = self.queryset.filter(is_admin=False)
+        result = []
+        for item in fitlers:
+            result.append(to_object(item))
+        print(result)
+        return Response({'data': result}, status=status.HTTP_200_OK)
